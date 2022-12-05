@@ -78,6 +78,6 @@ It’s much easier to just try out the demo here:
 
 https://docling.net/book/docling/components/data-viewer/try-data-viewer.html
 
-There are some very not-done documentation which will hopefully get better here:
+There is some very not-done documentation which will hopefully get better here:
 
 https://docling.net/book/docling/components/data-viewer/data-viewer.html
