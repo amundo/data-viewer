@@ -76,8 +76,9 @@ GitHub’s `CSS` makes the tables look a bit kooky here.
 
 It’s much easier to just try out the demo here:
 
-https://docling.net/book/docling/components/data-viewer/try-data-viewer.html
+
+[demo](demo.html)
 
 There is some very not-done documentation which will hopefully get better here:
 
-https://docling.net/book/docling/components/data-viewer/data-viewer.html
+[data-viewer.html](data-viewer.html)

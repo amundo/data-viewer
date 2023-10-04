@@ -1,153 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
+<head>  
   <title>data-viewer</title>
-  <style>
-  @import url(data-viewer.css);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="data-viewer.css">
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      display: grid;
-      margin:2em;
-      font-family: Fira Sans;;
-      grid-template:
-      auto
-      1fr
-      / auto
-      ;
-      grid-gap: 2em;
-      height: 100vh;
-      margin:0;
-    }
-    
-    header {
-      display: grid;
-      grid-template:
-        auto auto / 1fr 1fr;
-      padding:2em;
-      border-bottom: 1px solid;
-      background: lightgray;
-    }
-
-    header .copy {
-      grid-column: span 2;
-      display: flex;
-      gap: 1em;
-    }
-
-    header input[type=file] {
-      justify-self: end;
-    }
-    
-    header .copy input {
-      flex: 1;
-    }
-
-    header h1 {
-      margin: 0;
-    }
-
-    main {
-      flex: 1;
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap: 0 1em;
-      padding:2em;
-    }
-
-pre {
-  white-space: pre-wrap;
-  background: pink;
-}
-    interlinear-sentence {
-  display:block;
-  border: 1px solid;
-}
-
-  </style>
 </head>
 <body>
-<header>
-  <h1>data-viewer</h1>
-  <input type=file>
-  <div class=copy>
-    <button id=copy-link-button>copy link</button>
-    <input id=copy-link type=url>
-  </div>
-</header>
-<main>
-<textarea placeholder="Type JSON here. Escape key to format."></textarea>
-<section>
-  <data-viewer>
-  </data-viewer>
-  <pre></pre>
-</section>
-</main>
 
-<script type=module>
+    <data-viewer></data-viewer>  
+
+<script type="module">
 import {DataViewer} from './DataViewer.js'
 
-let textarea = document.querySelector('textarea')
-let dataViewer = document.querySelector('data-viewer')
-let pre = document.querySelector('pre')
-let fileInput = document.querySelector('input[type=file')
-let copyLinkButton = document.querySelector('button#copy-link-button')
-let copyLink = document.querySelector('input#copy-link')
-
-copyLinkButton.addEventListener('click', () => {
-  console.log(copyLink.value)
-  console.log(`wtf`)
-  navigator.clipboard.writeText(copyLink.value)
-})
-
-fileInput.addEventListener('change', e => {
-  let fileReader = new FileReader()
-  fileReader.addEventListener('load', e => {
-      let data = JSON.parse(e.target.result)  
-      dataViewer.data = data
-      let formatted = JSON.stringify(data, null, 2)
-      textarea.value = formatted
-    })
-    fileReader.readAsText(e.target.files[0])
-})
-
-textarea.addEventListener('keyup', e => {
-  try {
-    let data = JSON.parse(textarea.value)
-    pre.textContent = ''
-
-    if(e.key == 'Escape'){
-      textarea.value = JSON.stringify(data, null, 2)
-    }
-    
-    copyLink.value = `https://docling.net/book/docling/components/data-viewer/try-data-viewer.html#${encodeURIComponent(JSON.stringify(data))}`
-    dataViewer.data = data
-  } catch(e) {
-    pre.textContent = e
-  }
-
-})
-
-addEventListener('load', e => {
-  if(document.location.hash){
-    let hash = document.location.hash.slice(1)
-    let data = JSON.parse(decodeURIComponent(hash))
-    textarea.value = JSON.stringify(data, null, 2)
-    dataViewer.data = data
-  }
-})
-
-addEventListener('hashchange', e => {
-  let hash = document.location.hash.slice(1)
-  let data = JSON.parse(decodeURIComponent(hash))
-  textarea.value = JSON.stringify(data, null, 2)
-  dataViewer.data = data
-})
-
+window.DataViewer = document.querySelector('data-viewer')
 </script>
+
 </body>
 </html>
