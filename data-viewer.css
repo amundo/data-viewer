@@ -1,71 +1,60 @@
-data-viewer table {
-  border-collapse: collapse;
-}
-
-data-viewer th, data-viewer td {
-  padding: .2em;
-}
-
-data-viewer th {
-  background:lightgray;
-  color: #222;
-  letter-spacing: 1px;
-  font-weight: normal;
-  font-size: .8rem;
-}
-
-data-viewer th, data-viewer caption, data-viewer th {
-  font-weight: normal;
-  font-family: var(--mono-font);
-}
-
-data-viewer table, data-viewer table {
-  border: 1px solid lightgray;
-}
-
-data-viewer table th, data-viewer table td, data-viewer table th, data-viewer table td {
-  padding: .3em
-}
-
-data-viewer table th, data-viewer table th {
-  background: lightgray;
-  text-align: left;
-  font-family: var(--mono-font);
-}
-
-data-viewer table th, data-viewer table td {
-  text-align: left;
-}
-
-data-viewer table td {
-  border: 1px solid lightgray; 
-  font-family: var(--phonetic-family);
-}
-
 data-viewer {
   margin: 2em;
   display: block;
+
+  table {
+    border-collapse: collapse;
+    border: 1px solid lightgray;
+
+    th, td {
+      padding: .3em;
+      text-align: left;
+    }
+
+    th {
+      background: lightgray;
+      color: #222;
+      letter-spacing: 1px;
+      font-weight: normal;
+      font-size: .8rem;
+      font-family: var(--mono-font);
+    }
+
+    td {
+      border: 1px solid lightgray;
+      font-family: var(--phonetic-family);
+
+      [data-header=url] {
+        a {
+          word-break: break-all;
+        }
+      }
+    }
+  }
+
+  th, caption {
+    font-weight: normal;
+    font-family: var(--mono-font);
+  }
+
+  &.show-source {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+    place-items: center;
+
+    :first-child {
+      justify-self: end;
+    }
+
+    :nth-child(2) {
+      justify-self: start;
+    }
+
+    pre {
+      background: #333;
+      color: limegreen;
+      padding: 1em;
+    }
+  }
 }
-
-
-data-viewer.show-source {
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1em;  
-  place-items:center;
-}
-
-data-viewer.show-source :first-child {
-  justify-self: end;
-}
-
-data-viewer.show-source :nth-child(2) {
-  justify-self: start;
-}
-
-data-viewer.show-source pre {
-  background: #333;
-  color:limegreen;
-  padding:1em;
-}
-

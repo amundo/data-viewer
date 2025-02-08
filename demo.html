@@ -3,72 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>data-viewer</title>
-  <style>
-  @import url(data-viewer.css);
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      display: grid;
-      margin:2em;
-      font-family: Fira Sans;;
-      grid-template:
-      auto
-      1fr
-      / auto
-      ;
-      grid-gap: 2em;
-      height: 100vh;
-      margin:0;
-    }
-    
-    header {
-      display: grid;
-      grid-template:
-        auto auto / 1fr 1fr;
-      padding:2em;
-      border-bottom: 1px solid;
-      background: lightgray;
-    }
-
-    header .copy {
-      grid-column: span 2;
-      display: flex;
-      gap: 1em;
-    }
-
-    header input[type=file] {
-      justify-self: end;
-    }
-    
-    header .copy input {
-      flex: 1;
-    }
-
-    header h1 {
-      margin: 0;
-    }
-
-    main {
-      flex: 1;
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap: 0 1em;
-      padding:2em;
-    }
-
-pre {
-  white-space: pre-wrap;
-  background: pink;
-}
-    interlinear-sentence {
-  display:block;
-  border: 1px solid;
-}
-
-  </style>
+  <link rel="stylesheet" href="demo.css">
 </head>
 <body>
 <header>
@@ -99,8 +34,6 @@ let copyLinkButton = document.querySelector('button#copy-link-button')
 let copyLink = document.querySelector('input#copy-link')
 
 copyLinkButton.addEventListener('click', () => {
-  console.log(copyLink.value)
-  console.log(`wtf`)
   navigator.clipboard.writeText(copyLink.value)
 })
 
@@ -124,7 +57,7 @@ textarea.addEventListener('keyup', e => {
       textarea.value = JSON.stringify(data, null, 2)
     }
     
-    copyLink.value = `https://docling.net/book/docling/components/data-viewer/try-data-viewer.html#${encodeURIComponent(JSON.stringify(data))}`
+    copyLink.value = `http://pathall.net/data-viewer/v2.0.0/demo.html#${encodeURIComponent(JSON.stringify(data))}`
     dataViewer.data = data
   } catch(e) {
     pre.textContent = e
