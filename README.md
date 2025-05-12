@@ -1,4 +1,8 @@
-# data-viewer
+---
+title: data-viewer demo
+author: Patrick Hall
+---
+
 A simple table visualizer for JSON data. A web component.
 
 
