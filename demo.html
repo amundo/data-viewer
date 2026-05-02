@@ -2,25 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
   <title>data-viewer</title>
   <link rel="stylesheet" href="demo.css">
 </head>
 <body>
 <header>
-  <h1>data-viewer</h1>
-  <input type=file>
-  <div class=copy>
-    <button id=copy-link-button>copy link</button>
-    <input id=copy-link type=url>
+  <div>
+    <h1>data-viewer</h1>
+    <p>Paste, load, edit, and share JSON as readable tables.</p>
+  </div>
+  <div class=actions>
+    <label class=file-button>
+      <span>Open JSON</span>
+      <input type=file accept=".json,application/json">
+    </label>
+    <button id=sample-button type=button>Sample</button>
+    <button id=format-button type=button>Format</button>
+    <button id=minify-button type=button>Minify</button>
+    <button id=clear-button type=button>Clear</button>
   </div>
 </header>
+
 <main>
-<textarea placeholder="Type JSON here. Escape key to format."></textarea>
-<section>
-  <data-viewer>
-  </data-viewer>
-  <pre></pre>
-</section>
+  <section class=editor-panel aria-labelledby=editor-heading>
+    <div class=panel-header>
+      <h2 id=editor-heading>JSON</h2>
+      <span id=status role=status>Ready</span>
+    </div>
+    <textarea spellcheck=false placeholder="Paste JSON here"></textarea>
+    <div class=share-row>
+      <input id=copy-link type=url readonly aria-label="Share link">
+      <button id=copy-link-button type=button>Copy Link</button>
+    </div>
+    <pre class=error-output aria-live=polite></pre>
+  </section>
+
+  <section class=viewer-panel aria-labelledby=viewer-heading>
+    <div class=panel-header>
+      <h2 id=viewer-heading>Preview</h2>
+      <span id=summary></span>
+    </div>
+    <data-viewer></data-viewer>
+  </section>
 </main>
 
 <script type=module>
@@ -28,57 +52,182 @@ import {DataViewer} from './DataViewer.js'
 
 let textarea = document.querySelector('textarea')
 let dataViewer = document.querySelector('data-viewer')
-let pre = document.querySelector('pre')
-let fileInput = document.querySelector('input[type=file')
+let errorOutput = document.querySelector('.error-output')
+let fileInput = document.querySelector('input[type=file]')
 let copyLinkButton = document.querySelector('button#copy-link-button')
 let copyLink = document.querySelector('input#copy-link')
+let status = document.querySelector('#status')
+let summary = document.querySelector('#summary')
+let sampleButton = document.querySelector('#sample-button')
+let formatButton = document.querySelector('#format-button')
+let minifyButton = document.querySelector('#minify-button')
+let clearButton = document.querySelector('#clear-button')
 
-copyLinkButton.addEventListener('click', () => {
-  navigator.clipboard.writeText(copyLink.value)
+let sampleData = [
+  {
+    "year": 1958,
+    "make": "Plymouth",
+    "model": "Belvedere",
+    "features": ["4 door", "radio", "heater", "automatic transmission"]
+  },
+  {
+    "year": 1964,
+    "make": "Dodge",
+    "model": "Polara",
+    "features": ["V8", "push-button automatic", "bench seat"]
+  }
+]
+
+let describeData = data => {
+  if(Array.isArray(data)){
+    return `${data.length} ${data.length == 1 ? 'item' : 'items'}`
+  }
+
+  if(data && typeof data == 'object'){
+    let count = Object.keys(data).length
+    return `${count} ${count == 1 ? 'property' : 'properties'}`
+  }
+
+  return typeof data
+}
+
+let setStatus = (message, mode='neutral') => {
+  status.textContent = message
+  status.dataset.mode = mode
+}
+
+let buildShareLink = data => {
+  let url = new URL(document.location.href)
+  url.hash = encodeURIComponent(JSON.stringify(data))
+  return url.href
+}
+
+let renderData = (data, {updateHash=false}={}) => {
+  dataViewer.data = data
+  copyLink.value = buildShareLink(data)
+  summary.textContent = describeData(data)
+  errorOutput.textContent = ''
+  setStatus('Valid JSON', 'success')
+
+  if(updateHash){
+    history.replaceState(null, '', `#${encodeURIComponent(JSON.stringify(data))}`)
+  }
+}
+
+let showData = (data, {format=true, updateHash=false}={}) => {
+  textarea.value = JSON.stringify(data, null, format ? 2 : 0)
+  renderData(data, {updateHash})
+}
+
+copyLinkButton.addEventListener('click', async () => {
+  if(!copyLink.value){
+    setStatus('Nothing to copy', 'warning')
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(copyLink.value)
+    setStatus('Link copied', 'success')
+  } catch(error) {
+    copyLink.select()
+    setStatus('Select link to copy', 'warning')
+  }
 })
 
 fileInput.addEventListener('change', e => {
+  let file = e.target.files[0]
+  if(!file){
+    return
+  }
+
   let fileReader = new FileReader()
   fileReader.addEventListener('load', e => {
-      let data = JSON.parse(e.target.result)  
-      dataViewer.data = data
-      let formatted = JSON.stringify(data, null, 2)
-      textarea.value = formatted
-    })
-    fileReader.readAsText(e.target.files[0])
-})
-
-textarea.addEventListener('keyup', e => {
-  try {
-    let data = JSON.parse(textarea.value)
-    pre.textContent = ''
-
-    if(e.key == 'Escape'){
-      textarea.value = JSON.stringify(data, null, 2)
+    try {
+      let data = JSON.parse(e.target.result)
+      showData(data, {updateHash:true})
+      setStatus(`Loaded ${file.name}`, 'success')
+    } catch(error) {
+      errorOutput.textContent = error.message
+      setStatus('Invalid file', 'error')
     }
-    
-    copyLink.value = `http://pathall.net/data-viewer/v2.0.0/demo.html#${encodeURIComponent(JSON.stringify(data))}`
-    dataViewer.data = data
-  } catch(e) {
-    pre.textContent = e
-  }
-
+  })
+  fileReader.readAsText(file)
 })
 
-addEventListener('load', e => {
+textarea.addEventListener('input', () => {
+  try {
+    renderData(JSON.parse(textarea.value))
+  } catch(error) {
+    errorOutput.textContent = error.message
+    setStatus('Invalid JSON', 'error')
+  }
+})
+
+textarea.addEventListener('keydown', e => {
+  if(e.key == 'Escape'){
+    e.preventDefault()
+    formatButton.click()
+  }
+})
+
+sampleButton.addEventListener('click', () => {
+  showData(sampleData, {updateHash:true})
+})
+
+formatButton.addEventListener('click', () => {
+  try {
+    showData(JSON.parse(textarea.value), {format:true, updateHash:true})
+  } catch(error) {
+    errorOutput.textContent = error.message
+    setStatus('Invalid JSON', 'error')
+  }
+})
+
+minifyButton.addEventListener('click', () => {
+  try {
+    showData(JSON.parse(textarea.value), {format:false, updateHash:true})
+  } catch(error) {
+    errorOutput.textContent = error.message
+    setStatus('Invalid JSON', 'error')
+  }
+})
+
+clearButton.addEventListener('click', () => {
+  textarea.value = ''
+  dataViewer.innerHTML = ''
+  copyLink.value = ''
+  summary.textContent = ''
+  errorOutput.textContent = ''
+  history.replaceState(null, '', document.location.pathname)
+  setStatus('Ready')
+})
+
+addEventListener('load', () => {
   if(document.location.hash){
-    let hash = document.location.hash.slice(1)
-    let data = JSON.parse(decodeURIComponent(hash))
-    textarea.value = JSON.stringify(data, null, 2)
-    dataViewer.data = data
+    try {
+      let data = JSON.parse(decodeURIComponent(document.location.hash.slice(1)))
+      showData(data)
+    } catch(error) {
+      errorOutput.textContent = error.message
+      setStatus('Invalid link data', 'error')
+    }
+  } else {
+    showData(sampleData)
   }
 })
 
-addEventListener('hashchange', e => {
-  let hash = document.location.hash.slice(1)
-  let data = JSON.parse(decodeURIComponent(hash))
-  textarea.value = JSON.stringify(data, null, 2)
-  dataViewer.data = data
+addEventListener('hashchange', () => {
+  if(!document.location.hash){
+    return
+  }
+
+  try {
+    let data = JSON.parse(decodeURIComponent(document.location.hash.slice(1)))
+    showData(data)
+  } catch(error) {
+    errorOutput.textContent = error.message
+    setStatus('Invalid link data', 'error')
+  }
 })
 
 </script>
