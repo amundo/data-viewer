@@ -1,5 +1,6 @@
 {
   "tasks": {
-    "build": "pandoc -f markdown -t html --css data-viewer-docs.css --template=template.html -o data-viewer-docs.html data-viewer-docs.md"
+    "build": "pandoc -f markdown -t html --css data-viewer-docs.css --template=template.html -o data-viewer-docs.html data-viewer-docs.md",
+    "test": "deno test"
   }
 }

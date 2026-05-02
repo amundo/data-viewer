@@ -47,9 +47,14 @@ let renderArrayOfObjects = (array, headers=null) => {
 
   headers = headers || unique(array.map(item => Object.keys(item)).flat())
   
-  thead.innerHTML = headers.map(header => 
-    `<th data-header="${header}">${header}</th>`
-    ).join("")
+  let headerRow = document.createElement("tr")
+  headers.forEach(header => {
+    let th = document.createElement("th")
+    th.dataset.header = header
+    th.textContent = header
+    headerRow.append(th)
+  })
+  thead.append(headerRow)
 
   array.forEach(datum => {
     let tr = document.createElement("tr")
@@ -74,11 +79,12 @@ let renderObject = object => {
   Object.entries(object)
     .forEach(([key,value]) => {
       let tr = document.createElement("tr")
-      tr.innerHTML = `
-        <th>${key}</th>
-        <td data-header="${key}"></td>
-      `
-      tr.querySelector("td").append(render(value))
+      let th = document.createElement("th")
+      let td = document.createElement("td")
+      th.textContent = key
+      td.dataset.header = key
+      td.append(render(value))
+      tr.append(th, td)
       table.append(tr)
   })
   return table
@@ -156,6 +162,12 @@ class DataViewer extends HTMLElement {
     
     if(attribute == 'selector'){
       let sourceElement = document.querySelector(newValue)
+      if(!sourceElement){
+        return
+      }
+      if(sourceElement.data !== undefined){
+        this.data = sourceElement.data
+      }
       sourceElement.addEventListener('loaded', e => {
         this.data = sourceElement.data
       })
@@ -174,7 +186,7 @@ class DataViewer extends HTMLElement {
   get columns(){
     let keys = Object.keys(this.data[0])
     return keys.reduce((columns,key) => {
-      columns[key] = data.map(datum => 
+      columns[key] = this.data.map(datum => 
         datum[key])
       return columns
     }, {}
@@ -206,7 +218,10 @@ class DataViewer extends HTMLElement {
 
   edit(){
     this.querySelectorAll('td[data-header]').forEach(td => {
-      td.innerHTML = `<input value="${td.textContent}" />`
+      let input = document.createElement('input')
+      input.value = td.textContent
+      td.innerHTML = ``
+      td.append(input)
     })
   }
 

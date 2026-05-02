@@ -24,7 +24,7 @@ data-viewer {
       border: 1px solid lightgray;
       font-family: var(--phonetic-family);
 
-      [data-header=url] {
+      &[data-header=url] {
         a {
           word-break: break-all;
         }
